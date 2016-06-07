@@ -12,7 +12,6 @@ var term = pty.fork('bash', [], {
 });
 
 term.on('data', function(data) {
-  // console.log(data)
   ws.send(data);
 });
 
@@ -21,6 +20,15 @@ ws.on('open', function () {
 })
 
 ws.on('message', function (message) {
-  // console.log('received', message)
   term.write(message)
+})
+
+ws.on('error', function () {
+  console.log('connection closed')
+  process.exit(1)
+})
+
+ws.on('close', function () {
+  console.log('connection closed')
+  process.exit(1)
 })
