@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <title>term.js</title>
+  </head>
+  <body>
+    <script src="js/term.js"></script>
+    <script src="//js.pusher.com/3.1/pusher.min.js"></script>
+    <script>
+    ;(function() {
+      window.onload = function() {
+        var socket = new WebSocket("ws://localhost:8080/?type=remote");
+        socket.onopen = function () {
+          setTimeout(function () { console.log(1);socket.send("\n") }, 1000);
+        }
+
+        socket.onmessage = function (message) {
+          console.log(message.data);
+          // term.write("\r" + message.data + "\n");
+          term.write(message.data);
+        }
+
+        
+
+        // var socket = io.connect();
+        // socket.on('connect', function() {
+          var term = new Terminal({
+            cols: 80,
+            rows: 24,
+            useStyle: true,
+            screenKeys: true,
+            useStyle: true,
+            cursorBlink: true
+          });
+          term.on('data', function (data) {
+            term.write(data)
+            console.log(data)
+            socket.send(data)
+          });
+          term.on('title', function(title) {
+            document.title = title;
+          });
+          term.open(document.body);
+          term.write('\x1b[31mWelcome to term.js!\x1b[m\r\n');
+          // socket.on('data', function(data) {
+          //   term.write(data);
+          // });
+          // socket.on('disconnect', function() {
+          //   term.destroy();
+          // });
+        // });
+
+        window.term = term;
+
+      };
+    }).call(this);
+    </script>
+  </body>
+</html>
