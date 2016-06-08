@@ -25,7 +25,18 @@
       </div>
     </div>
 
-    <div id="console"></div>
+    <div class="modal fade" id="console-modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">REMOTO</h4>
+          </div>
+          <div class="modal-body" id="console" style="height: 400px;">
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
@@ -37,9 +48,42 @@
         function update_terminals(terminals) {
           var ts = []
           terminals.forEach(function (t) {
-            ts.push("<div class='col-md-4'><h4><a href='#' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
+            ts.push("<div class='col-md-4'><h4><a href='#' data-token='" + t + "' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
           })
           $('#terminals').html(ts.join(''))
+          $('a.thumbnail').on('click', function () {
+            socket.send(JSON.stringify({ type: "CONN", message: $(this).data('token') }))
+            create_terminal()
+          })
+        }
+
+        function create_terminal() {
+          $('#console').innerHTML = ''
+          $('#console-modal').modal('show')
+          if (window.term) window.term.destroy()
+
+          var term = new Terminal({
+            cols: 80,
+            rows: 24,
+            useStyle: true,
+            screenKeys: true,
+            cursorBlink: true
+          })
+          term.on('data', function (data) {
+            // term.write(data)
+            var message = JSON.stringify({
+              type: 'IN',
+              message: data
+            })
+            socket.send(message)
+          })
+          term.on('title', function(title) {
+            document.title = title
+          })
+          term.open(document.getElementById('console'))
+          term.write('\x1b[31mWelcome to REMOTO!\x1b[m\r\n')
+          socket.send(JSON.stringify({ type: 'IN', message: "\n" }))
+          window.term = term
         }
 
         var socket = new WebSocket("ws://localhost:8080/?type=remote");
@@ -49,41 +93,16 @@
 
         socket.onmessage = function (message) {
           var obj = JSON.parse(message.data)
-          console.log(obj)
-          if (obj.type == "TERMS") {
+          if (obj.type == "LIST") {
             update_terminals(obj.message)
           } if (obj.type == "OUT") {
-            term.write(obj.message)
+            window.term.write(obj.message)
           }
         }
 
-        socket.onerror = function () {
-          term.destroy()
+        socket.onerror = socket.onclose = function () {
+          window.term.destroy()
         }
-
-        var term = new Terminal({
-          cols: 80,
-          rows: 24,
-          useStyle: true,
-          screenKeys: true,
-          cursorBlink: true
-        })
-        term.on('data', function (data) {
-          // term.write(data)
-          var message = JSON.stringify({
-            type: 'IN',
-            message: data
-          })
-          socket.send(message)
-        })
-        term.on('title', function(title) {
-          document.title = title
-        })
-        term.open(document.getElementById('console'))
-        term.write('\x1b[31mWelcome!\x1b[m\r\n')
-
-        window.term = term;
-
       };
     }).call(this);
     </script>

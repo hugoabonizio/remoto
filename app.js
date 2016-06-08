@@ -20,7 +20,7 @@ function update_terminal_list() {
   })
   connections.forEach(function (c) {
     if (c.type == 'remote')
-      c.conn.send(JSON.stringify({ type: "TERMS", message: tokens }))
+      c.conn.send(JSON.stringify({ type: "LIST", message: tokens }))
   })
 }
 
@@ -29,7 +29,8 @@ wss.on('connection', function connection(ws) {
 
   var type = (location.query['type'] == 'terminal') ? 'terminal' : 'remote'
   var token = location.query['token']
-  connections.push({ type: type, conn: ws, token: token })
+  var connection = { type: type, conn: ws, token: token }
+  connections.push(connection)
 
   update_terminal_list()
 
@@ -38,9 +39,14 @@ wss.on('connection', function connection(ws) {
     // console.log(message)
     var obj = JSON.parse(message)
 
-    connections.forEach((c) => {
-      if (c.type == to) c.conn.send(JSON.stringify({ type: obj.type, message: obj.message }))
-    })
+    if (obj.type == 'CONN') {
+      connection.token = obj.message
+    } else {
+      connections.forEach((c) => {
+        if (c.type == to && c.token == connection.token)
+          c.conn.send(JSON.stringify({ type: obj.type, message: obj.message }))
+      })
+    }
   })
 
   ws.on('close', () => {
