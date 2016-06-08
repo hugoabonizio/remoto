@@ -1,21 +1,60 @@
 <!doctype html>
 <html>
   <head>
-    <title>term.js</title>
+    <title>REMOTO - Remote terminal on your browser</title>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
   </head>
   <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>REMOTO</h1>
+      </div>
+      <p class="lead">
+        <i class="glyphicon glyphicon-console"></i>Terminals connected to this server:
+      </p>
+      
+      <div class="row" id="terminals">
+        <div class="col-md-4">
+          <h4>
+            <a href="#" class="thumbnail text-center" style="text-decoration: none;">
+              <i class="glyphicon glyphicon-cloud"></i>Terminal (192.168.1.2)
+            </a>
+          </h4>
+        </div>
+      </div>
+    </div>
+
+    <div id="console"></div>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="js/term.js"></script>
     <script src="//js.pusher.com/3.1/pusher.min.js"></script>
     <script>
     ;(function() {
       window.onload = function() {
+        function update_terminals(terminals) {
+          var ts = []
+          terminals.forEach(function (t) {
+            ts.push("<div class='col-md-4'><h4><a href='#' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
+          })
+          $('#terminals').html(ts.join(''))
+        }
+
         var socket = new WebSocket("ws://localhost:8080/?type=remote");
         socket.onopen = function () {
-          socket.send("\n")
+          socket.send(JSON.stringify({ type: "IN", message: "\n" }))
         }
 
         socket.onmessage = function (message) {
-          term.write(message.data)
+          var obj = JSON.parse(message.data)
+          console.log(obj)
+          if (obj.type == "TERMS") {
+            update_terminals(obj.message)
+          } if (obj.type == "OUT") {
+            term.write(obj.message)
+          }
         }
 
         socket.onerror = function () {
@@ -31,12 +70,16 @@
         })
         term.on('data', function (data) {
           // term.write(data)
-          socket.send(data)
+          var message = JSON.stringify({
+            type: 'IN',
+            message: data
+          })
+          socket.send(message)
         })
         term.on('title', function(title) {
           document.title = title
         })
-        term.open(document.body)
+        term.open(document.getElementById('console'))
         term.write('\x1b[31mWelcome!\x1b[m\r\n')
 
         window.term = term;

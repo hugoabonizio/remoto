@@ -1,27 +1,45 @@
+#!/usr/bin/env node
+"use strict";
 var server = require('http').createServer(),
-    url = require('url')
-    WebSocketServer = require('ws').Server
-    wss = new WebSocketServer({ server: server })
-    express = require('express')
-    app = express()
-    port = 8080
+    url = require('url'),
+    WebSocketServer = require('ws').Server,
+    wss = new WebSocketServer({ server: server }),
+    express = require('express'),
+    app = express(),
+    port = process.env.PORT || 8080
 
 app.use(express.static('public'))
 
 var connections = []
 
+function update_terminal_list() {
+  var tokens = []
+  connections.forEach(function (c) {
+    if (c.type == 'terminal')
+      tokens.push(c.token)
+  })
+  connections.forEach(function (c) {
+    if (c.type == 'remote')
+      c.conn.send(JSON.stringify({ type: "TERMS", message: tokens }))
+  })
+}
+
 wss.on('connection', function connection(ws) {
   var location = url.parse(ws.upgradeReq.url, true)
 
   var type = (location.query['type'] == 'terminal') ? 'terminal' : 'remote'
-  connections.push({ type: type, conn: ws })
+  var token = location.query['token']
+  connections.push({ type: type, conn: ws, token: token })
+
+  update_terminal_list()
 
   ws.on('message', function (message) {
     var to = (type == 'remote') ? 'terminal' : 'remote'
-    console.log(to, message)
+    // console.log(message)
+    var obj = JSON.parse(message)
 
     connections.forEach((c) => {
-      if (c.type == to) c.conn.send(message)
+      if (c.type == to) c.conn.send(JSON.stringify({ type: obj.type, message: obj.message }))
     })
   })
 
@@ -44,17 +62,9 @@ wss.on('connection', function connection(ws) {
       }
     })
   })
-
-  // console.log(ws.upgradeReq.headers['type'])
   // you might use location.query.access_token to authenticate or share sessions
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-
-  // ws.on('message', function incoming(message) {
-  //   console.log('received: %s', message);
-  // });
-
-  // ws.send('echo 1');
-});
+})
 
 server.on('request', app)
 server.listen(port, function () { console.log('Listening on ' + server.address().port) })
