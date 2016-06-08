@@ -7,8 +7,10 @@ function generate_token(size) {
   return text;
 }
 
+var token = generate_token(32);
+
 var WebSocket = require('ws')
-var ws = new WebSocket('ws://localhost:8080/?type=terminal&token=' + generate_token(32));
+var ws = new WebSocket('ws://localhost:8080/?type=terminal&token=' + token);
 var pty = require('pty.js')
 
 var term = pty.fork('bash', [], {
@@ -26,7 +28,7 @@ term.on('data', function (data) {
 });
 
 ws.on('open', function () {
-  console.log("connection opened")
+  console.log("Connection opened with token", token)
 })
 
 ws.on('message', function (message) {
@@ -40,11 +42,11 @@ ws.on('message', function (message) {
 })
 
 ws.on('error', function (e) {
-  console.log('connection closed', e)
+  console.log('Connection closed', e)
   process.exit(1)
 })
 
 ws.on('close', function (e) {
-  console.log('connection closed', e)
+  console.log('Connection closed', e)
   process.exit(1)
 })
