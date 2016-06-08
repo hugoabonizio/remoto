@@ -1,8 +1,12 @@
 {
-  "name": "remote_terminal",
+  "name": "remoto",
   "version": "0.0.1",
-  "description": "Remote terminal that runs on browser like an easy to use SSH",
+  "description": "Remoto is a remote terminal that runs on browser like an easy to use SSH",
   "main": "app.js",
+  "bin": {
+    "remoto-server": "./app.js",
+    "remoto": "./terminal.js"
+  },
   "dependencies": {
     "express": "^4.13.4",
     "pty.js": "^0.3.0",
