@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 function generate_token(size) {
-  var text = '';
-  var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var text = ''
+  var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   for( var i=0; i < size; i++ )
-    text += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-  return text;
+    text += alphabet.charAt(Math.floor(Math.random() * alphabet.length))
+  return text
 }
 
-var url
+var host
 if (process.argv[2])
-  url = process.argv[2]
+  host = process.argv[2]
 else
-  url = 'localhost:8080'
+  host = 'localhost:8080'
 
-var token = generate_token(32);
+var token = generate_token(32)
 
 var WebSocket = require('ws')
-var ws = new WebSocket('ws://' + url + '/?type=terminal&token=' + token);
+var ws = new WebSocket('ws://' + host + '/?type=terminal&token=' + token)
 var pty = require('pty.js')
 
 var term = pty.fork('bash', [], {
@@ -26,15 +26,15 @@ var term = pty.fork('bash', [], {
   cols: 80,
   rows: 24,
   cwd: process.env.HOME
-});
-
-term.on('data', function (data) {
-  var message = JSON.stringify({ type: 'OUT', message: data })
-  ws.send(message);
-});
+})
 
 ws.on('open', function () {
   console.log("Connection opened with token", token)
+
+  term.on('data', function (data) {
+    var message = JSON.stringify({ type: 'OUT', message: data })
+    ws.send(message)
+  })
 })
 
 ws.on('message', function (message) {
