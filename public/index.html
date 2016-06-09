@@ -86,7 +86,7 @@
           window.term = term
         }
 
-        var socket = new WebSocket("ws://localhost:8080/?type=remote");
+        var socket = new WebSocket('ws://' + location.host + '/?type=remote');
         socket.onopen = function () {
           socket.send(JSON.stringify({ type: "IN", message: "\n" }))
         }
