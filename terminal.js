@@ -7,10 +7,16 @@ function generate_token(size) {
   return text;
 }
 
+var url
+if (process.argv[2])
+  url = process.argv[2]
+else
+  url = 'localhost:8080'
+
 var token = generate_token(32);
 
 var WebSocket = require('ws')
-var ws = new WebSocket('ws://localhost:8080/?type=terminal&token=' + token);
+var ws = new WebSocket('ws://' + url + '/?type=terminal&token=' + token);
 var pty = require('pty.js')
 
 var term = pty.fork('bash', [], {
