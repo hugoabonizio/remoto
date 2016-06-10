@@ -6,7 +6,12 @@ var server = require('http').createServer(),
     wss = new WebSocketServer({ server: server }),
     express = require('express'),
     app = express(),
-    port = process.env.PORT || 8080
+    port = process.env.PORT || 8080,
+    basicAuth = require('basic-auth-connect'),
+    argv = require('minimist')(process.argv.slice(2));
+
+if (argv.u && argv.p)
+  app.use(basicAuth(argv.u, argv.p))
 
 app.use(express.static('public'))
 
