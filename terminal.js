@@ -26,17 +26,19 @@ function check() {
 function connect() {
   ws = new WebSocket('ws://' + host + '/?type=terminal&token=' + token)
 
-  var term = pty.fork('bash', [], {
-    name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
-      ? 'xterm-256color'
-      : 'xterm',
-    cols: 80,
-    rows: 24,
-    cwd: process.env.HOME
-  })
+  var term
 
   ws.on('open', function () {
     console.log("Connection opened with token", token)
+
+    term = pty.fork('bash', [], {
+      name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
+        ? 'xterm-256color'
+        : 'xterm',
+      cols: 80,
+      rows: 24,
+      cwd: process.env.HOME
+    })
 
     term.on('data', function (data) {
       var message = JSON.stringify({ type: 'OUT', message: data })

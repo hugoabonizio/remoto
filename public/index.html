@@ -45,19 +45,26 @@
     <script>
     ;(function() {
       window.onload = function() {
+        var socket
+
         function update_terminals(terminals) {
           var ts = []
           terminals.forEach(function (t) {
-            ts.push("<div class='col-md-4'><h4><a href='#' data-token='" + t + "' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
+            ts.push("<div class='col-md-4'><h4><a href='#" + t + "' data-token='" + t + "' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
           })
           $('#terminals').html(ts.join(''))
           $('a.thumbnail').on('click', function () {
-            socket.send(JSON.stringify({ type: "CONN", message: $(this).data('token') }))
-            create_terminal()
+            create_terminal($(this).data('token'))
           })
         }
 
-        function create_terminal() {
+        function create_terminal(token) {
+          // attach to channel
+          socket.send(JSON.stringify({
+            type: "CONN",
+            message: token
+          }))
+
           $('#console').innerHTML = ''
           $('#console-modal').modal('show')
           if (window.term) window.term.destroy()
@@ -87,33 +94,64 @@
           window.term = term
         }
 
-        var socket = new WebSocket('ws://' + location.host + '/?type=remote');
-        socket.onopen = function () {
-          socket.send(JSON.stringify({ type: "IN", message: "\n" }))
+        function connect() {
+          socket = new WebSocket('ws://' + location.host + '/?type=remote')
+          window.socket = socket
+          socket.onopen = function () {
+            // if connection is reopening, attach to previous channel
+            if (window.location.hash)
+              socket.send(JSON.stringify({
+                type: "CONN",
+                message: window.location.hash.substring(1)
+              }))
 
-          var ping = setInterval(function () {
-          try {
-              ws.send(JSON.stringify({ type: 'PING', message: 'PING!' }))
-            } catch (ex) {
-              clearInterval(ping)
+            socket.send(JSON.stringify({ type: "IN", message: "\n" }))
+
+            var ping = setInterval(function () {
+            try {
+                ws.send(JSON.stringify({ type: 'PING', message: 'PING!' }))
+              } catch (ex) {
+                clearInterval(ping)
+              }
+            }, 1000)
+          }
+
+          socket.onmessage = function (message) {
+            var obj = JSON.parse(message.data)
+            if (obj.type == "LIST") {
+              update_terminals(obj.message)
+            } if (obj.type == "OUT") {
+              if (window.term) {
+                window.term.write(obj.message)
+                // console.log(window.term, obj.message)
+              } else {
+                console.log('Terminal not instantied yet')
+              }
             }
-          }, 1000)
-        }
+          }
 
-        socket.onmessage = function (message) {
-          var obj = JSON.parse(message.data)
-          if (obj.type == "LIST") {
-            update_terminals(obj.message)
-          } if (obj.type == "OUT") {
-            window.term.write(obj.message)
+          socket.onerror = socket.onclose = function () {
+            // if (window.term) window.term.destroy()
+            socket = null
+            setTimeout(check, 1000)
           }
         }
 
-        socket.onerror = socket.onclose = function () {
-          window.term.destroy()
+        function check() {
+          if (!socket || socket.readyState == WebSocket.CLOSED) connect()
         }
-      };
-    }).call(this);
+
+        connect()
+        setInterval(check, 5000)
+
+        if (window.location.hash) {
+          setTimeout(function () {
+            if (socket.readyState == WebSocket.OPEN)
+            create_terminal(window.location.hash.substring(1))
+          }, 1000)
+        }
+      }
+    }).call(this)
     </script>
   </body>
 </html>

@@ -13,14 +13,24 @@ app.use(express.static('public'))
 var connections = []
 
 function update_terminal_list() {
-  var tokens = []
-  connections.forEach(function (c) {
-    if (c.type == 'terminal')
-      tokens.push(c.token)
-  })
-  connections.forEach(function (c) {
-    if (c.type == 'remote')
-      c.conn.send(JSON.stringify({ type: "LIST", message: tokens }))
+  try {
+    var tokens = []
+    connections.forEach(function (c) {
+      if (c.type == 'terminal')
+        tokens.push(c.token)
+    })
+    connections.forEach(function (c) {
+      if (c.type == 'remote')
+        c.conn.send(JSON.stringify({ type: "LIST", message: tokens }))
+    })
+  } catch (ex) {
+    check_connections()
+  }
+}
+
+function check_connections() {
+  connections.forEach(c => {
+    if (c.conn.readyState == 3) disconnect(c.conn)
   })
 }
 
