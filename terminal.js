@@ -10,11 +10,16 @@ function generate_token(size) {
   return text
 }
 
-var host
+var host, label
 if (process.argv[2])
   host = process.argv[2]
 else
   host = 'localhost:8080'
+
+if (process.argv[3])
+  label = process.argv[3]
+else
+  label = 'REMOTO terminal'
 
 var token = generate_token(32)
 var ws
@@ -24,12 +29,12 @@ function check() {
 }
 
 function connect() {
-  ws = new WebSocket('ws://' + host + '/?type=terminal&token=' + token)
+  ws = new WebSocket('ws://' + host + '/?type=terminal&token=' + token + '&label=' + label)
 
   var term
 
   ws.on('open', function () {
-    console.log("Connection opened with token", token)
+    console.log("Connection opened at http://%s/#%s", host, token)
 
     term = pty.fork('bash', [], {
       name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
@@ -67,17 +72,17 @@ function connect() {
   })
 
   ws.on('error', function (e) {
-    console.log('Connection closed', e)
+    console.log('Connection error', e)
     ws = null
-    setTimeout(check, 1000)
+    // setTimeout(check, 1000)
   })
 
   ws.on('close', function (e) {
-    console.log('Connection closed', e)
+    // console.log('Connection closed', e)
     ws = null
     setTimeout(check, 1000)
   })
 }
 
 connect()
-setInterval(check, 5000)
+// setInterval(check, 5000)

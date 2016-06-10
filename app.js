@@ -14,14 +14,17 @@ var connections = []
 
 function update_terminal_list() {
   try {
-    var tokens = []
+    var conns = []
     connections.forEach(function (c) {
       if (c.type == 'terminal')
-        tokens.push(c.token)
+        conns.push([c.label, c.token])
     })
     connections.forEach(function (c) {
       if (c.type == 'remote')
-        c.conn.send(JSON.stringify({ type: "LIST", message: tokens }))
+        c.conn.send(JSON.stringify({
+          type: "LIST",
+          message: conns
+        }))
     })
   } catch (ex) {
     check_connections()
@@ -50,7 +53,13 @@ wss.on('connection', function connection(ws) {
 
   var type = (location.query['type'] == 'terminal') ? 'terminal' : 'remote'
   var token = location.query['token']
-  var connection = { type: type, conn: ws, token: token }
+  var label = location.query['label']
+  var connection = {
+    type: type,
+    conn: ws,
+    token: token,
+    label: label
+  }
   connections.push(connection)
 
   update_terminal_list()

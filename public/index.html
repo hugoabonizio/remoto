@@ -8,20 +8,20 @@
   <body>
     <div class="container">
       <div class="page-header">
-        <h1>REMOTO</h1>
+        <h1><i class="glyphicon glyphicon-console" style="color: green"></i> REMOTO</h1>
       </div>
       <p class="lead">
-        <i class="glyphicon glyphicon-console"></i>Terminals connected to this server:
+        Remote terminals connected to this server:
       </p>
       
       <div class="row" id="terminals">
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
           <h4>
             <a href="#" class="thumbnail text-center" style="text-decoration: none;">
               <i class="glyphicon glyphicon-cloud"></i>Terminal (192.168.1.2)
             </a>
           </h4>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -48,14 +48,18 @@
         var socket
 
         function update_terminals(terminals) {
-          var ts = []
-          terminals.forEach(function (t) {
-            ts.push("<div class='col-md-4'><h4><a href='#" + t + "' data-token='" + t + "' class='thumbnail text-center' style='text-decoration: none;'><i class='glyphicon glyphicon-cloud'></i> (" + t + ")</a></h4></div>")
-          })
-          $('#terminals').html(ts.join(''))
-          $('a.thumbnail').on('click', function () {
-            create_terminal($(this).data('token'))
-          })
+          if (terminals.length) {
+            var ts = []
+            terminals.forEach(function (t) {
+              ts.push("<div class='col-md-4'><h4><a href='#" + t[1] + "' data-token='" + t[1] + "' class='thumbnail text-center' style='text-decoration: none;'>" + t[0] + "</a></h4></div>")
+            })
+            $('#terminals').html(ts.join(''))
+            $('a.thumbnail').on('click', function () {
+              create_terminal($(this).data('token'))
+            })
+          } else {
+            $('#terminals').html('<div class="alert alert-warning" role="alert">No terminals connected!</div>')
+          }
         }
 
         function create_terminal(token) {
@@ -85,9 +89,9 @@
             })
             socket.send(message)
           })
-          term.on('title', function(title) {
-            document.title = title
-          })
+          // term.on('title', function(title) {
+          //   document.title = title
+          // })
           term.open(document.getElementById('console'))
           term.write('\x1b[31mWelcome to REMOTO!\x1b[m\r\n')
           socket.send(JSON.stringify({ type: 'IN', message: "\n" }))
