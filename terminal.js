@@ -35,6 +35,10 @@ ws.on('open', function () {
     var message = JSON.stringify({ type: 'OUT', message: data })
     ws.send(message)
   })
+
+  setInterval(function () {
+    ws.send(JSON.stringify({ type: 'PING', message: 'PING!' }))
+  }, 1000)
 })
 
 ws.on('message', function (message) {

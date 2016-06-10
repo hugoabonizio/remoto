@@ -41,6 +41,8 @@ wss.on('connection', function connection(ws) {
 
     if (obj.type == 'CONN') {
       connection.token = obj.message
+    } else if (obj.type == 'PING') {
+      ws.send(JSON.stringify({ type: 'PONG', message: 'PONG!' }))
     } else {
       connections.forEach((c) => {
         if (c.type == to && c.token == connection.token)
