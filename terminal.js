@@ -44,8 +44,9 @@ ws.on('open', function () {
 ws.on('message', function (message) {
   try {
     var obj = JSON.parse(message)
-    // console.log(obj)
-    term.write(obj.message)
+    if (obj.type == 'IN') {
+      term.write(obj.message)
+    }
   } catch (ex) {
     console.error(message, ex)
   }
