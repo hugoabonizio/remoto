@@ -62,6 +62,7 @@
           $('#console-modal').modal('show')
           if (window.term) window.term.destroy()
 
+          window.term = null
           var term = new Terminal({
             cols: 80,
             rows: 24,
@@ -89,6 +90,14 @@
         var socket = new WebSocket('ws://' + location.host + '/?type=remote');
         socket.onopen = function () {
           socket.send(JSON.stringify({ type: "IN", message: "\n" }))
+
+          var ping = setInterval(function () {
+          try {
+              ws.send(JSON.stringify({ type: 'PING', message: 'PING!' }))
+            } catch (ex) {
+              clearInterval(ping)
+            }
+          }, 1000)
         }
 
         socket.onmessage = function (message) {
