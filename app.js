@@ -24,6 +24,17 @@ function update_terminal_list() {
   })
 }
 
+function disconnect(ws) {
+  connections.forEach((c) => {
+    if (c.conn == ws) {
+      var index = connections.indexOf(c)
+      if (index > -1)
+        connections.splice(index, 1)
+    }
+  })
+  update_terminal_list()
+}
+
 wss.on('connection', function connection(ws) {
   var location = url.parse(ws.upgradeReq.url, true)
 
@@ -52,23 +63,11 @@ wss.on('connection', function connection(ws) {
   })
 
   ws.on('close', () => {
-    connections.forEach((c) => {
-      if (c.conn == ws) {
-        var index = connections.indexOf(c)
-        if (index > -1)
-          connections.splice(index, 1)
-      }
-    })
+    disconnect(ws)
   })
 
   ws.on('error', () => {
-    connections.forEach((c) => {
-      if (c.conn == ws) {
-        var index = connections.indexOf(c)
-        if (index > -1)
-          connections.splice(index, 1)
-      }
-    })
+    disconnect(ws)
   })
   // you might use location.query.access_token to authenticate or share sessions
   // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
