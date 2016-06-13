@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-"use strict";
-var server = require('http').createServer(),
-    url = require('url'),
-    WebSocketServer = require('ws').Server,
-    wss = new WebSocketServer({ server: server }),
-    express = require('express'),
-    app = express(),
-    port = process.env.PORT || 8080,
-    basicAuth = require('basic-auth-connect'),
-    argv = require('minimist')(process.argv.slice(2));
+"use strict"
+var server = require('http').createServer()
+var url = require('url')
+var WebSocketServer = require('ws').Server
+var wss = new WebSocketServer({ server: server })
+var express = require('express')
+var app = express()
+var port = process.env.PORT || 8080
+var basicAuth = require('basic-auth-connect')
+var argv = require('minimist')(process.argv.slice(2))
 
 if (argv.u && argv.p)
   app.use(basicAuth(argv.u, argv.p))
 
-app.use(express.static('public'))
+app.use(express.static(__dirname + '/public'))
 
 var connections = []
 
@@ -27,7 +27,7 @@ function update_terminal_list() {
     connections.forEach(function (c) {
       if (c.type == 'remote')
         c.conn.send(JSON.stringify({
-          type: "LIST",
+          type: 'LIST',
           message: conns
         }))
     })

@@ -1,6 +1,6 @@
 {
   "name": "remoto",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Remoto is a remote terminal that runs on browser like an easy to use SSH",
   "main": "app.js",
   "bin": {
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hugoabonizio/remote_terminal.git"
+    "url": "git+https://github.com/hugoabonizio/remoto.git"
   },
   "keywords": [
     "ssh",
@@ -32,7 +32,7 @@
   "author": "Hugo Abonizio",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hugoabonizio/remote_terminal/issues"
+    "url": "https://github.com/hugoabonizio/remoto/issues"
   },
-  "homepage": "https://github.com/hugoabonizio/remote_terminal#readme"
+  "homepage": "https://github.com/hugoabonizio/remoto#readme"
 }
