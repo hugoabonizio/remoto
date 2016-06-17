@@ -40,8 +40,8 @@ function connect() {
       name: require('fs').existsSync('/usr/share/terminfo/x/xterm-256color')
         ? 'xterm-256color'
         : 'xterm',
-      cols: 80,
-      rows: 24,
+      cols: 160,
+      rows: 36,
       cwd: process.env.HOME
     })
 
