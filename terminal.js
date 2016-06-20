@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var WebSocket = require('ws')
 var pty = require('pty.js')
+var cluster = require('cluster')
 
 function generate_token(size) {
   var text = ''
@@ -88,5 +89,20 @@ function connect() {
   })
 }
 
-connect()
-// setInterval(check, 5000)
+if (cluster.isMaster) {
+  cluster.fork()
+
+  cluster.on('exit', function (worker) {
+    console.log('Worker %s died, restarting...', worker.process.pid)
+    cluster.fork()
+  })
+} else {
+  ws = null
+  connect()
+}
+
+process.on('uncaughtException', function (err) {
+  console.error((new Date).toUTCString() + ' uncaughtException:', err.message)
+  console.error(err.stack)
+  process.exit(1)
+})
