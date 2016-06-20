@@ -71,6 +71,10 @@
 
           $('#console').innerHTML = ''
           $('#console-modal').modal('show')
+          window.location.hash = token
+          $('#console-modal').on('hidden.bs.modal', function () {
+            window.location.hash = ''
+          })
           if (window.term) window.term.destroy()
 
           window.term = null
