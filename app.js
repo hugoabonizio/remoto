@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 "use strict"
+var cluster = require('cluster')
 var server = require('http').createServer()
 var url = require('url')
 var WebSocketServer = require('ws').Server
@@ -116,5 +117,20 @@ wss.on('connection', function connection(ws) {
   })
 })
 
-server.on('request', app)
-server.listen(port, function () { console.log('Listening on ' + server.address().port) })
+if (cluster.isMaster) {
+  cluster.fork()
+
+  cluster.on('exit', function (worker) {
+    console.log('Worker %s died, restarting...', worker.process.pid)
+    cluster.fork()
+  })
+} else {
+  server.on('request', app)
+  server.listen(port, function () { console.log('Listening on ' + server.address().port) })
+}
+
+process.on('uncaughtException', function (err) {
+  console.error((new Date).toUTCString() + ' uncaughtException:', err.message)
+  console.error(err.stack)
+  process.exit(1)
+})
