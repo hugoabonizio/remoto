@@ -38,7 +38,12 @@ function update_terminal_list() {
 
 function check_connections() {
   connections.forEach(c => {
-    if (c.conn.readyState == 3) disconnect(c.conn)
+    try {
+      if (c.conn.readyState == 3) disconnect(c.conn)
+    } catch (ex) {
+      disconnect(c.conn)
+      console.error(ex, ex.stack)
+    }
   })
 }
 
@@ -59,6 +64,15 @@ wss.on('connection', function connection(ws) {
   var type = (location.query['type'] == 'terminal') ? 'terminal' : 'remote'
   var token = location.query['token']
   var label = location.query['label']
+  if (type == 'terminal' && (!token || !label)) {
+    try {
+      ws.close()
+    } catch (ex) {
+      console.error(ex, ex.stack)
+    } finally {
+      return null
+    }
+  }
   var connection = {
     type: type,
     conn: ws,
@@ -70,19 +84,26 @@ wss.on('connection', function connection(ws) {
   update_terminal_list()
 
   ws.on('message', function (message) {
-    var to = (type == 'remote') ? 'terminal' : 'remote'
-    // console.log(message)
-    var obj = JSON.parse(message)
+    try {
+      var to = (type == 'remote') ? 'terminal' : 'remote'
+      var obj = JSON.parse(message)
 
-    if (obj.type == 'CONN') {
-      connection.token = obj.message
-    } else if (obj.type == 'PING') {
-      ws.send(JSON.stringify({ type: 'PONG', message: 'PONG!' }))
-    } else {
-      connections.forEach((c) => {
-        if (c.type == to && c.token == connection.token)
-          c.conn.send(JSON.stringify({ type: obj.type, message: obj.message }))
-      })
+      if (obj.type == 'CONN') {
+        connection.token = obj.message
+      } else if (obj.type == 'PING') {
+        ws.send(JSON.stringify({ type: 'PONG', message: 'PONG!' }))
+      } else {
+        connections.forEach((c) => {
+          try {
+            if (c.type == to && c.token == connection.token)
+              c.conn.send(JSON.stringify({ type: obj.type, message: obj.message }))
+          } catch (e) {
+            disconnect(c.conn)
+          }
+        })
+      }
+    } catch (ex) {
+      console.error(ex, ex.stack)
     }
   })
 
@@ -93,8 +114,6 @@ wss.on('connection', function connection(ws) {
   ws.on('error', () => {
     disconnect(ws)
   })
-  // you might use location.query.access_token to authenticate or share sessions
-  // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 })
 
 server.on('request', app)
