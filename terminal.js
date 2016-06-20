@@ -47,7 +47,11 @@ function connect() {
 
     term.on('data', function (data) {
       var message = JSON.stringify({ type: 'OUT', message: data })
-      ws.send(message)
+      try {
+        ws.send(message)
+      } catch (ex) {
+        console.error(ex)
+      }
     })
 
     var ping = setInterval(function () {
@@ -55,7 +59,7 @@ function connect() {
         ws.send(JSON.stringify({ type: 'PING', message: 'PING!' }))
       } catch (ex) {
         clearInterval(ping)
-        // log exception
+        console.error(ex)
       }
     }, 1000)
   })
