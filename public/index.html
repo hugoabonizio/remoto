@@ -41,7 +41,6 @@
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
     <script src="js/term.js"></script>
-    <script src="//js.pusher.com/3.1/pusher.min.js"></script>
     <script>
     ;(function() {
       window.onload = function() {
@@ -92,6 +91,11 @@
               message: data
             })
             socket.send(message)
+          })
+          term.on('open', function () {
+            setTimeout(function () {
+              document.querySelector('#console .terminal').focus()
+            }, 500)
           })
           // term.on('title', function(title) {
           //   document.title = title
