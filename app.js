@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict"
 var cluster = require('cluster')
+var fs = require('fs')
 var server = require('http').createServer()
 var url = require('url')
 var WebSocketServer = require('ws').Server
@@ -11,8 +12,27 @@ var port = process.env.PORT || 8080
 var basicAuth = require('basic-auth-connect')
 var argv = require('minimist')(process.argv.slice(2))
 
-if (argv.u && argv.p)
-  app.use(basicAuth(argv.u, argv.p))
+var user, pass;
+
+// Read -u and -p params
+if (argv.u && argv.p) {
+  user = argv.u
+  pass = argv.p
+}
+
+// Check for remoto.json config file
+try {
+  var config = JSON.parse(fs.readFileSync('remoto.json'))
+  user = config.user
+  pass = config.password
+  if (config.port)
+    port = config.port
+} catch (e) {
+  // console.log('No valid remoto.json config file found')
+}
+
+if (user && pass)
+  app.use(basicAuth(user, pass))
 
 app.use(express.static(__dirname + '/public'))
 
