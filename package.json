@@ -1,6 +1,6 @@
 {
   "name": "remoto",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Remoto is a remote terminal that runs on browser like an easy to use SSH",
   "main": "app.js",
   "bin": {
