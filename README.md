@@ -13,7 +13,7 @@ To run **Remoto** server application
 remoto-server -u user -p password
 ```
 
-You can use a config file called ```remoto.json``` to set configurations.
+You can use a config file called ```remoto.json``` to set configurations. This repository has a ```remoto.json.sample``` as example that can be renamed to ```remoto.json```.
 
 ```
 // remoto.json
@@ -32,7 +32,7 @@ To run **Remoto** terminal client
 remoto [HOST] [LABEL]
 ```
 
-For example, if your server is hosted on Heroku, the command above could be something like that:
+You can access (http://remoto-server.herokuapp.com) to test the service:
 
 ```
 remoto remoto-server.herokuapp.com TestServer01
