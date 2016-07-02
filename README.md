@@ -35,7 +35,7 @@ remoto [HOST] [LABEL]
 For example, if your server is hosted on Heroku, the command above could be something like that:
 
 ```
-remoto my-server.herokuapp.com Computer01
+remoto remoto-server.herokuapp.com TestServer01
 ```
 
 ## Screenshots

@@ -36,6 +36,6 @@
   },
   "homepage": "https://github.com/hugoabonizio/remoto#readme",
   "engines": {
-    "node": "5.12.0"
+    "node": ">=5.0.0"
   }
 }
