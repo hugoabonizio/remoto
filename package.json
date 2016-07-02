@@ -34,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/hugoabonizio/remoto/issues"
   },
-  "homepage": "https://github.com/hugoabonizio/remoto#readme"
+  "homepage": "https://github.com/hugoabonizio/remoto#readme",
+  "engines": {
+    "node": "5.12.0"
+  }
 }

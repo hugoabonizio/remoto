@@ -1,1 +1,1 @@
-web: node app.js -u demo -p pass123
+web: npm start
