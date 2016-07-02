@@ -1,4 +1,5 @@
 {
   "user": "demo",
-  "password": "pass123"
+  "password": "pass123",
+  "port": 3000
 }

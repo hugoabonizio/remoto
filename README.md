@@ -2,7 +2,7 @@
 **Remoto** is a remote terminal application with a Web GUI to make remote access as easy as it can.
 
 ```
-npm install remoto -g
+$ npm install remoto -g
 ```
 
 ## Running server
@@ -10,7 +10,7 @@ npm install remoto -g
 To run **Remoto** server application
 
 ```
-remoto-server -u user -p password
+$ remoto-server -u user -p password
 ```
 
 You can use a config file called ```remoto.json``` to set configurations. This repository has a ```remoto.json.sample``` as example that can be renamed to ```remoto.json```.
@@ -29,13 +29,13 @@ You can use a config file called ```remoto.json``` to set configurations. This r
 To run **Remoto** terminal client
 
 ```
-remoto [HOST] [LABEL]
+$ remoto [HOST] [LABEL]
 ```
 
 You can access (http://remoto-server.herokuapp.com) to test the service:
 
 ```
-remoto remoto-server.herokuapp.com TestServer01
+$ remoto remoto-server.herokuapp.com TestServer01
 ```
 
 ## Screenshots
