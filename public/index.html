@@ -107,7 +107,10 @@
         }
 
         function connect() {
-          socket = new WebSocket('ws://' + location.host + '/?type=remote')
+          var protocol = 'wss'
+          if (window.location.protocol == 'http:')
+            protocol = 'ws'
+          socket = new WebSocket(protocol + '://' + location.host + '/?type=remote')
           window.socket = socket
           socket.onopen = function () {
             // if connection is reopening, attach to previous channel
